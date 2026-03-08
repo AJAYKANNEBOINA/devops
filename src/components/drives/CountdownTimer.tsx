@@ -14,8 +14,18 @@ export default function CountdownTimer({ targetDate, targetTime }: CountdownTime
 
   useEffect(() => {
     setMounted(true);
-    const timePart = targetTime.split(" ")[0];
-    const target = new Date(`${targetDate}T${timePart}:00`);
+
+    // Parse time like "09:00 AM - 05:00 PM" → take start time and convert to 24-hour
+    const startTimePart = targetTime.split(" - ")[0].trim(); // "09:00 AM"
+    const [hhmm, meridiem] = startTimePart.split(" ");
+    const [hoursStr, minutesStr] = hhmm.split(":");
+    let hours = parseInt(hoursStr, 10);
+    const minutes = parseInt(minutesStr, 10);
+    if (meridiem === "PM" && hours !== 12) hours += 12;
+    if (meridiem === "AM" && hours === 12) hours = 0;
+    const hours24 = String(hours).padStart(2, "0");
+    const mins24 = String(minutes).padStart(2, "0");
+    const target = new Date(`${targetDate}T${hours24}:${mins24}:00`);
 
     const interval = setInterval(() => {
       const now = new Date();
